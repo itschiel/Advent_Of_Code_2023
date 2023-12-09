@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -10,63 +11,56 @@ int main(){
 
     ifstream input("input.txt");
     string line;
-    string ignore;
 
-    vector<int> cardNumbers;
-
-    int totalNumberOfScratchCards =0;
-
-
-    //fetching list of cards
-    cardNumbers.push_back(0);
-    while (getline(input, line)) cardNumbers.push_back(1);
+    // Create a vector to store the amount of copies we have of each card
+    // Index = card number, Value = amount of copies
+    vector<int> cardCopies;
+    cardCopies.push_back(0); // because there is'nt a card 0
+    while (getline(input, line)) cardCopies.push_back(1);
     
+
+    // Resetting the input filestream
     input.clear();
     input.seekg(0, ios::beg);
-    int cardNumber = 0;
-    while (getline(input, line))
+
+
+    for (size_t cardNumber = 1; getline(input, line); cardNumber++)
     {
-        istringstream card(line);
-        cardNumber++;
-        getline(card, ignore, ':');
+        istringstream lineStream(line);
+        lineStream.ignore(10, ':');
 
-        int winningNumbers[10];
-        int drawnNumbers[25];
 
-        // fetch the winningNumbers
-        for (size_t i = 0; i < 10; i++) card >> winningNumbers[i];
+        // fetch the winningNumbers and drawnNumbers
+        vector<int> winningNumbers;
+        vector<int> drawnNumbers;
 
-        // ignore the | seperator
-        card >> ignore;
+        int number;
+        while (lineStream >> number)winningNumbers.push_back(number);
 
-        // fetch the drawnNumbers
-        for (size_t i = 0; i < 25; i++) card >> drawnNumbers[i];        
+        lineStream.clear();
+        lineStream.ignore(2, '|');
 
-        // count the score by comparing the winning and the drawn numbers
-        int count = 0;
-        for (size_t i = 0; i < 25; i++)
+        while (lineStream >> number) {drawnNumbers.push_back(number);}
+
+
+        // count the matches between the winning and drawn numbers
+        int matchesCount = 0;
+        for (int drawnNumber : drawnNumbers)
         {
-            for (size_t j = 0; j < 10; j++)
-            {
-                if (drawnNumbers[i] == winningNumbers[j]) 
-                {
-                    count++;
-                }     
-            }  
+            if (find(winningNumbers.begin(), winningNumbers.end(), drawnNumber) != winningNumbers.end()) matchesCount++;
         }
 
-        // updating card multiplier
-        for (size_t i = 1; i <= count; i++)
+        // count the copies we won
+        for (size_t i = 1; i <= matchesCount; i++)
         {            
-            cardNumbers[cardNumber + i] += (1 * cardNumbers[cardNumber]);
+            cardCopies[cardNumber + i] += cardCopies[cardNumber];
         }       
-              
-        
     }    
 
-    for (size_t i = 0; i < cardNumbers.size(); i++)
+    int totalNumberOfScratchCards = 0;
+    for (int copies : cardCopies)
     {
-        totalNumberOfScratchCards += cardNumbers[i];
+        totalNumberOfScratchCards += copies;
     }
     
     cout << totalNumberOfScratchCards;

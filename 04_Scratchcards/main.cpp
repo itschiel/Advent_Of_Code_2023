@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -10,48 +12,44 @@ int main()
 {
     ifstream input ("input.txt");
     string line;
-    string ignore;
 
-    int sum;
+    int scoreSum;
 
     while (getline(input, line))
     {
-        istringstream card(line);
-        getline(card, ignore, ':');
+        istringstream lineStream(line);
+        lineStream.ignore(10, ':');
 
-        int winningNumbers[10];
-        int drawnNumbers[25];
+        // fetch the winningNumbers and drawnNumbers
+        vector<int> winningNumbers;
+        vector<int> drawnNumbers;
 
-        // fetch the winningNumbers
-        for (size_t i = 0; i < 10; i++) card >> winningNumbers[i];
+        int number;
+        while (lineStream >> number)winningNumbers.push_back(number);
 
-        // ignore the | seperator
-        card >> ignore;
+        lineStream.clear();
+        lineStream.ignore(2, '|');
 
-        // fetch the drawnNumbers
-        for (size_t i = 0; i < 25; i++) card >> drawnNumbers[i];        
+        while (lineStream >> number) {drawnNumbers.push_back(number);}
+
 
         // count the score by comparing the winning and the drawn numbers
         int cardScore = 0;
-        for (size_t i = 0; i < 25; i++)
+        for (int drawnNumber : drawnNumbers)
         {
-            for (size_t j = 0; j < 10; j++)
+            if (find(winningNumbers.begin(), winningNumbers.end(), drawnNumber) != winningNumbers.end())
             {
-                if (drawnNumbers[i] == winningNumbers[j]) 
-                {
-                    if (cardScore > 0) cardScore = cardScore * 2;       
-                    if (cardScore == 0) cardScore++;
-                }
-                
+                if (cardScore > 0) cardScore = cardScore * 2;       
+                if (cardScore == 0) cardScore++;
             }
             
         }
         
-        sum += cardScore;        
+        scoreSum += cardScore;        
         
     }
 
-    cout << sum;
+    cout << scoreSum;
     
     return 0;
 }
