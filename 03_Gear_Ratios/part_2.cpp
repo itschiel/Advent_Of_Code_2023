@@ -7,13 +7,10 @@
 
 using namespace std;
 
-bool isSymbol(char c) {
-    if (c <= '\000') return false;
-    if (c == '.') return false;
-    if (c >=  '0' && c <= '9') return false;
-
-    return true;
-
+void add_to_map(map<string, vector<int>>* m, int line, int col, int number)
+{
+    string pos = to_string(line) + '-' + to_string(col);
+    (*m)[pos].push_back(number);
 }
 
 int main()
@@ -21,7 +18,7 @@ int main()
     ifstream input ("input.txt");
     string line;
 
-    map<string, vector<int>> map;
+    map<string, vector<int>> map; //map of numbers adjecent to an astrisk [[pos *][adjecent numbers]]
     int lineCount = 0;
     int sum = 0;
 
@@ -58,13 +55,13 @@ int main()
             // check for adjecent *
             int numberLength = to_string(number).length() + 1;
                         
-            if (currentLine[i] == '*') map[to_string(lineCount) + '-' + to_string(i)].push_back(number);
-            if (currentLine[i - numberLength] == '*') map[to_string(lineCount) + '-' + to_string(i-numberLength)].push_back(number);            
+            if (currentLine[i] == '*') add_to_map(&map, lineCount, i, number);
+            if (currentLine[i - numberLength] == '*') add_to_map(&map, lineCount, i-numberLength, number);            
 
             for (size_t j = 0; j <= numberLength; j++)
             {
-                if (prevLine[i-j] == '*') map[to_string(lineCount - 1) + '-' + to_string(i-j)].push_back(number);
-                if (nextLine[i-j] == '*') map[to_string(lineCount + 1) + '-' + to_string(i-j)].push_back(number);              
+                if (prevLine[i-j] == '*') add_to_map(&map, lineCount-1, i-j, number);
+                if (nextLine[i-j] == '*') add_to_map(&map, lineCount+1, i-j, number);              
             }
             
         }
